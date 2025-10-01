@@ -4,6 +4,8 @@ public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement")]
     public float moveSpeed;
+    public float sprintMult;
+    public float crouchMult;
 
     public float groundDrag;
 
@@ -12,15 +14,20 @@ public class PlayerMovement : MonoBehaviour
     public float airMult;
 
     bool jumpPossible;
+    bool sprinting;
+    bool crouched;
 
     [Header("Keybinds")]
     public KeyCode jumpKey = KeyCode.Space; 
+    public KeyCode sprintKey = KeyCode.LeftShift;
+    public KeyCode crouchKey = KeyCode.LeftControl;
 
 
     [Header("Ground Check")]
     public float playerHeight;
     public LayerMask whatisGround;
     bool grounded;
+    
 
     public Transform orientation;
 
@@ -68,6 +75,9 @@ public class PlayerMovement : MonoBehaviour
     {
         horizontalInput = Input.GetAxisRaw("Horizontal");
         verticalInput = Input.GetAxisRaw("Vertical");
+        sprinting = Input.GetKey(sprintKey);
+        crouched = Input.GetKey(crouchKey);
+
 
         if (Input.GetKey(jumpKey) && jumpPossible && grounded)
         {
@@ -83,12 +93,21 @@ public class PlayerMovement : MonoBehaviour
     {
         moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
 
-        Debug.Log(moveDirection);
+    
         moveDirection.y = 0f;
 
         if (grounded)
         {
-            rb.AddForce(moveDirection * moveSpeed * 10f, ForceMode.Force);
+            if (crouched){
+                rb.AddForce((moveDirection * moveSpeed * 10f) * crouchMult, ForceMode.Force);
+            }
+            else if (sprinting){
+                rb.AddForce((moveDirection * moveSpeed * 10f) * sprintMult, ForceMode.Force);
+            }
+            else{
+                rb.AddForce(moveDirection * moveSpeed * 10f, ForceMode.Force);
+            }
+            
         }
         else
         {
