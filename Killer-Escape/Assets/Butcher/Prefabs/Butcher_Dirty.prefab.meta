@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e869fc74bd137cd45863e904fe392f87
+timeCreated: 1478611064
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 73409
+  packageName: Butcher The Murderer - PBR
+  packageVersion: 1.0
+  assetPath: Assets/Butcher/Prefabs/Butcher_Dirty.prefab
+  uploadId: 145518
