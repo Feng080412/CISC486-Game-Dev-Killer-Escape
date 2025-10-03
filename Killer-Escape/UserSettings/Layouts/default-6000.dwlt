@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 3440
     height: 1357
   m_ShowMode: 4
-  m_Title: Game
+  m_Title: Project
   m_RootView: {fileID: 6}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -69,8 +69,8 @@ MonoBehaviour:
     y: 0
     width: 812
     height: 1301
-  m_MinSize: {x: 276, y: 76}
-  m_MaxSize: {x: 4001, y: 4026}
+  m_MinSize: {x: 275, y: 50}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 13}
   m_Panes:
   - {fileID: 13}
@@ -301,7 +301,7 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 0
-    y: 793
+    y: 848
     width: 2627
     height: 506
   m_SerializedDataModeController:
@@ -326,7 +326,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Scripts/Player Scrips
+    - Assets
     m_Globs: []
     m_ProductIds: 
     m_AnyWithAssetOrigin: 0
@@ -336,16 +336,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/Scripts/Player Scrips
+  - Assets
   m_LastFoldersGridSize: -1
   m_LastProjectPath: C:\Users\Owner\Documents\AAAAAAA- VIDEO GAME FOR CLASS GITHUB\CISC486-Game-Dev-Killer-Escape\Killer-Escape
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: 7a470000
-    m_LastClickedID: 18298
-    m_ExpandedIDs: 0000000016470000
+    m_SelectedIDs: 16470000
+    m_LastClickedID: 18198
+    m_ExpandedIDs: 00000000164700006a4700006e470000204a0000244a0000284a000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -453,8 +453,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Inspector\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 2629
-    y: 24
+    x: 2628
+    y: 79
     width: 811
     height: 1275
   m_SerializedDataModeController:
@@ -503,7 +503,7 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 0
-    y: 24
+    y: 79
     width: 649
     height: 743
   m_SerializedDataModeController:
@@ -522,7 +522,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 36fbffffbc460000ea460000
+      m_ExpandedIDs: ac99ffff54c0ffff02dbffff36fbffffbc460000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -568,8 +568,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Scene\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 651
-    y: 24
+    x: 650
+    y: 79
     width: 1976
     height: 743
   m_SerializedDataModeController:
@@ -1084,9 +1084,9 @@ MonoBehaviour:
   m_AudioPlay: 0
   m_DebugDrawModesUseInteractiveLightBakingData: 0
   m_Position:
-    m_Target: {x: -0.24636054, y: -0.87491536, z: -2.4464011}
+    m_Target: {x: 12.765812, y: 0.4985982, z: -2.0463152}
     speed: 2
-    m_Value: {x: -0.24636054, y: -0.87491536, z: -2.4464011}
+    m_Value: {x: 12.765812, y: 0.4985982, z: -2.0463152}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -1132,13 +1132,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: -0.0017644517, y: 0.97916687, z: -0.20288438, w: -0.0085183745}
+    m_Target: {x: -0.018108973, y: -0.7121793, z: 0.01838643, w: -0.7015659}
     speed: 2
-    m_Value: {x: -0.0017644517, y: 0.97916687, z: -0.20288439, w: -0.0085183745}
+    m_Value: {x: -0.01810843, y: -0.7121579, z: 0.018385876, w: -0.7015448}
   m_Size:
-    m_Target: 6.015665
+    m_Target: 7.198774
     speed: 2
-    m_Value: 6.015665
+    m_Value: 7.537983
   m_Ortho:
     m_Target: 0
     speed: 2
