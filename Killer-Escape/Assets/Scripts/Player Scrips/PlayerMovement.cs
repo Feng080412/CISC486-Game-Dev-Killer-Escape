@@ -13,6 +13,8 @@ public class PlayerMovement : MonoBehaviour
     public float jumpCool;
     public float airMult;
 
+    private float maxSpeed;
+
     bool jumpPossible;
     bool sprinting;
     bool crouched;
@@ -24,12 +26,21 @@ public class PlayerMovement : MonoBehaviour
 
 
     [Header("Ground Check")]
-    public float playerHeight;
+    private float playerHeight;
     public LayerMask whatisGround;
     bool grounded;
+    public Transform orientation;
     
 
-    public Transform orientation;
+    [Header("Crouch Debug")]
+    public float crouchHeight = 1.0f;
+    public float standingHeight = 2.0f;
+    public float cameraCrouchChange = -0.5f;
+    [SerializeField] private CapsuleCollider capsule;
+    [SerializeField] private Transform camPos;
+    
+
+    
 
     float horizontalInput;
     float verticalInput;
@@ -37,32 +48,40 @@ public class PlayerMovement : MonoBehaviour
     Vector3 moveDirection;
 
     Rigidbody rb;
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
         jumpPossible = true;
+        standingHeight = capsule.height;
+        playerHeight = standingHeight;
+        maxSpeed = moveSpeed;
+        
+        
     }
 
     // Update is called once per frame
     void Update()
     {
-        //check if grounded
-        grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, whatisGround);
+        GroundCheck();
         GetInput();
         SpeedControl();
 
-        //handle drag
-        if (grounded)
-        {
-            rb.linearDamping = groundDrag;
-        }
-        else
-        {
-            rb.linearDamping = 0f;
-        }
+        CrouchCheck();
 
+        //handle drag
+        rb.linearDamping = grounded ? groundDrag : 0f;
+
+    }
+
+    void GroundCheck()
+    {
+        //check if grounded
+        Vector3 capsuleBottom = capsule.bounds.center - Vector3.up * (capsule.height / 2f - 0.1f);
+        Vector3 capsuleTop = capsule.bounds.center + Vector3.up * (capsule.height / 2f - 0.1f);
+        grounded = Physics.CheckCapsule(capsuleBottom, capsuleTop, capsule.radius * 0.9f, whatisGround);
     }
 
     void FixedUpdate()
@@ -89,41 +108,67 @@ public class PlayerMovement : MonoBehaviour
         }
 
     }
-    private void MovePlayer()
+
+    private void CrouchCheck()
     {
-        moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
-
-    
-        moveDirection.y = 0f;
-
-        if (grounded)
+        if (crouched)
         {
-            if (crouched){
-                rb.AddForce((moveDirection * moveSpeed * 10f) * crouchMult, ForceMode.Force);
-            }
-            else if (sprinting){
-                rb.AddForce((moveDirection * moveSpeed * 10f) * sprintMult, ForceMode.Force);
-            }
-            else{
-                rb.AddForce(moveDirection * moveSpeed * 10f, ForceMode.Force);
-            }
-            
+            playerHeight = crouchHeight;
+            capsule.height = crouchHeight;
+        
         }
         else
         {
-            rb.AddForce(moveDirection * moveSpeed * 10f * airMult, ForceMode.Force);
+            //check to see if uncrouch possible
+            Vector3 standBottom = capsule.transform.position + Vector3.up * capsule.radius;
+            Vector3 standTop = capsule.transform.position + Vector3.up * (standingHeight - capsule.radius);
+            
+
+            bool blocked = Physics.CheckCapsule(standBottom, standTop, capsule.radius * 0.9f, whatisGround);
+            
+
+            if (!blocked)
+            {
+                playerHeight = standingHeight;
+                capsule.height = standingHeight;
+            }
+            else
+            {
+                crouched=true;
+            }
+
         }
+    }
+
+    private void MovePlayer()
+    {
+        //NOTE: in scene playermaterial stops from sticking to walls
+        
+        moveDirection = (orientation.forward * verticalInput + orientation.right * horizontalInput).normalized;
+        moveDirection.y = 0f;
+
+
+
+        //add velocity depending on current states (airborne, sprinting, crouching, etc)
+        rb.AddForce(moveDirection * maxSpeed * 10f * (grounded ? 1f : airMult), ForceMode.Force);
+
         
     }
 
     private void SpeedControl()
     {
+        
         Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
+        
+        if (crouched && grounded) maxSpeed = moveSpeed*crouchMult;
+        else if (sprinting && grounded) maxSpeed = moveSpeed*sprintMult;
+        else if (grounded) maxSpeed = moveSpeed;
+
         //limit velocity if needed
-        if (flatVel.magnitude > moveSpeed)
+        if (flatVel.magnitude > maxSpeed)
         {
-            Vector3 limitedVel = flatVel.normalized * moveSpeed;
+            Vector3 limitedVel = flatVel.normalized * maxSpeed;
             rb.linearVelocity = new Vector3(limitedVel.x, rb.linearVelocity.y, limitedVel.z);
         }
     }
