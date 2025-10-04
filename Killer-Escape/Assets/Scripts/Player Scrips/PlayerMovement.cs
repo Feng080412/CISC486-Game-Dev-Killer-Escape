@@ -79,9 +79,8 @@ public class PlayerMovement : MonoBehaviour
     void GroundCheck()
     {
         //check if grounded
-        Vector3 capsuleBottom = capsule.bounds.center - Vector3.up * (capsule.height / 2f - 0.1f);
-        Vector3 capsuleTop = capsule.bounds.center + Vector3.up * (capsule.height / 2f - 0.1f);
-        grounded = Physics.CheckCapsule(capsuleBottom, capsuleTop, capsule.radius * 0.9f, whatisGround);
+        Vector3 capsuleBottom = capsule.bounds.center - Vector3.up * (capsule.height / 2f - 0.05f);
+        grounded = Physics.Raycast(capsuleBottom, Vector3.down, 0.1f, whatisGround);
     }
 
     void FixedUpdate()
