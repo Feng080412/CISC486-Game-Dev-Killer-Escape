@@ -187,13 +187,8 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aE.dag/Unity.Multiplayer.Center.Common.rsp",
       "DisplayName": "Writing Unity.Multiplayer.Center.Common.rsp",
       "ActionType": "WriteFile",
-<<<<<<< HEAD
-      "PayloadOffset": 324,
-      "PayloadLength": 36174,
-=======
       "PayloadOffset": 312,
       "PayloadLength": 36200,
->>>>>>> NPC-FSM
       "PayloadDebugContentSnippet": "-target:library\n-out:\"Library/",
       "Inputs": [],
       "InputFlags": [],
@@ -209,15 +204,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aE.dag/Unity.Multiplayer.Center.Common.rsp2",
       "DisplayName": "Writing Unity.Multiplayer.Center.Common.rsp2",
       "ActionType": "WriteFile",
-<<<<<<< HEAD
-      "PayloadOffset": 36601,
-      "PayloadLength": 119,
-      "PayloadDebugContentSnippet": "/pathmap:\"C:\\Users\\Owner\\Docum",
-=======
       "PayloadOffset": 36615,
       "PayloadLength": 107,
       "PayloadDebugContentSnippet": "/pathmap:\"C:\\Users\\jeffp\\OneDr",
->>>>>>> NPC-FSM
       "Inputs": [],
       "InputFlags": [],
       "Outputs": [
@@ -3531,11 +3520,7 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aE.dag/Unity.Multiplayer.Center.Common.dll.mvfrm.rsp",
       "DisplayName": "Writing Unity.Multiplayer.Center.Common.dll.mvfrm.rsp",
       "ActionType": "WriteFile",
-<<<<<<< HEAD
-      "PayloadOffset": 36832,
-=======
       "PayloadOffset": 36834,
->>>>>>> NPC-FSM
       "PayloadLength": 10744,
       "PayloadDebugContentSnippet": "Library\\Bee\\artifacts\\mvdfrm\\U",
       "Inputs": [],
@@ -3948,15 +3933,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aE.dag/Unity.Multiplayer.Center.Editor.UnityAdditionalFile.txt",
       "DisplayName": "Writing Unity.Multiplayer.Center.Editor.UnityAdditionalFile.txt",
       "ActionType": "WriteFile",
-<<<<<<< HEAD
-      "PayloadOffset": 47698,
-      "PayloadLength": 106,
-      "PayloadDebugContentSnippet": "C:\\Users\\Owner\\Documents\\AAAAA",
-=======
       "PayloadOffset": 47700,
       "PayloadLength": 94,
       "PayloadDebugContentSnippet": "C:\\Users\\jeffp\\OneDrive\\Docume",
->>>>>>> NPC-FSM
       "Inputs": [],
       "InputFlags": [],
       "Outputs": [
@@ -3971,13 +3950,8 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aE.dag/Unity.Multiplayer.Center.Editor.rsp",
       "DisplayName": "Writing Unity.Multiplayer.Center.Editor.rsp",
       "ActionType": "WriteFile",
-<<<<<<< HEAD
-      "PayloadOffset": 47906,
-      "PayloadLength": 41392,
-=======
       "PayloadOffset": 47896,
       "PayloadLength": 41418,
->>>>>>> NPC-FSM
       "PayloadDebugContentSnippet": "-target:library\n-out:\"Library/",
       "Inputs": [],
       "InputFlags": [],
@@ -3993,15 +3967,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aE.dag/Unity.Multiplayer.Center.Editor.rsp2",
       "DisplayName": "Writing Unity.Multiplayer.Center.Editor.rsp2",
       "ActionType": "WriteFile",
-<<<<<<< HEAD
-      "PayloadOffset": 89401,
-      "PayloadLength": 119,
-      "PayloadDebugContentSnippet": "/pathmap:\"C:\\Users\\Owner\\Docum",
-=======
       "PayloadOffset": 89417,
       "PayloadLength": 107,
       "PayloadDebugContentSnippet": "/pathmap:\"C:\\Users\\jeffp\\OneDr",
->>>>>>> NPC-FSM
       "Inputs": [],
       "InputFlags": [],
       "Outputs": [
@@ -4713,11 +4681,7 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aE.dag/Unity.Multiplayer.Center.Editor.dll.mvfrm.rsp",
       "DisplayName": "Writing Unity.Multiplayer.Center.Editor.dll.mvfrm.rsp",
       "ActionType": "WriteFile",
-<<<<<<< HEAD
-      "PayloadOffset": 89632,
-=======
       "PayloadOffset": 89636,
->>>>>>> NPC-FSM
       "PayloadLength": 10998,
       "PayloadDebugContentSnippet": "Library\\Bee\\artifacts\\mvdfrm\\U",
       "Inputs": [],
@@ -5139,15 +5103,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aE.dag/Assembly-CSharp.UnityAdditionalFile.txt",
       "DisplayName": "Writing Assembly-CSharp.UnityAdditionalFile.txt",
       "ActionType": "WriteFile",
-<<<<<<< HEAD
-      "PayloadOffset": 100736,
-      "PayloadLength": 106,
-      "PayloadDebugContentSnippet": "C:\\Users\\Owner\\Documents\\AAAAA",
-=======
       "PayloadOffset": 100740,
       "PayloadLength": 94,
       "PayloadDebugContentSnippet": "C:\\Users\\jeffp\\OneDrive\\Docume",
->>>>>>> NPC-FSM
       "Inputs": [],
       "InputFlags": [],
       "Outputs": [
@@ -5162,13 +5120,8 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aE.dag/Assembly-CSharp.rsp",
       "DisplayName": "Writing Assembly-CSharp.rsp",
       "ActionType": "WriteFile",
-<<<<<<< HEAD
-      "PayloadOffset": 100928,
-      "PayloadLength": 35617,
-=======
       "PayloadOffset": 100920,
       "PayloadLength": 35643,
->>>>>>> NPC-FSM
       "PayloadDebugContentSnippet": "-target:library\n-out:\"Library/",
       "Inputs": [],
       "InputFlags": [],
@@ -5184,11 +5137,7 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aE.dag/Assembly-CSharp.rsp2",
       "DisplayName": "Writing Assembly-CSharp.rsp2",
       "ActionType": "WriteFile",
-<<<<<<< HEAD
-      "PayloadOffset": 136632,
-=======
       "PayloadOffset": 136650,
->>>>>>> NPC-FSM
       "PayloadLength": 0,
       "PayloadDebugContentSnippet": "",
       "Inputs": [],
@@ -5774,11 +5723,7 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aE.dag/Assembly-CSharp.dll.mvfrm.rsp",
       "DisplayName": "Writing Assembly-CSharp.dll.mvfrm.rsp",
       "ActionType": "WriteFile",
-<<<<<<< HEAD
-      "PayloadOffset": 136728,
-=======
       "PayloadOffset": 136746,
->>>>>>> NPC-FSM
       "PayloadLength": 10756,
       "PayloadDebugContentSnippet": "Library\\Bee\\artifacts\\mvdfrm\\U",
       "Inputs": [],
@@ -6316,11 +6261,7 @@
     {
       "Annotation": "BuildPlayerDataGenerator Library/BuildPlayerData/Editor/TypeDb-All.json",
       "DisplayName": "Extracting script serialization layouts",
-<<<<<<< HEAD
-      "Action": "\"C:/Program Files/Unity/Hub/Editor/6000.2.6f2/Editor/Data\\Tools\\netcorerun\\netcorerun.exe\" \"C:/Program Files/Unity/Hub/Editor/6000.2.6f2/Editor/Data/Tools/BuildPlayerDataGenerator/BuildPlayerDataGenerator.exe\" -a=\"C:\\Users\\Owner\\Documents\\AAAAAAA- VIDEO GAME FOR CLASS GITHUB\\CISC486-Game-Dev-Killer-Escape\\Killer-Escape\\Library\\ScriptAssemblies\\Assembly-CSharp.dll\" -a=\"C:\\Users\\Owner\\Documents\\AAAAAAA- VIDEO GAME FOR CLASS GITHUB\\CISC486-Game-Dev-Killer-Escape\\Killer-Escape\\Library\\ScriptAssemblies\\Unity.Multiplayer.Center.Common.dll\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.2.6f2\\Editor\\Data\\Managed\\UnityEngine\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.2.6f2\\Editor\\Data\\NetStandard\\compat\\2.1.0\\shims\\netfx\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.2.6f2\\Editor\\Data\\NetStandard\\compat\\2.1.0\\shims\\netstandard\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.2.6f2\\Editor\\Data\\NetStandard\\EditorExtensions\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.2.6f2\\Editor\\Data\\NetStandard\\Extensions\\2.0.0\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.2.6f2\\Editor\\Data\\NetStandard\\ref\\2.1.0\" -s=\"C:\\Users\\Owner\\Documents\\AAAAAAA- VIDEO GAME FOR CLASS GITHUB\\CISC486-Game-Dev-Killer-Escape\\Killer-Escape\\Library\\ScriptAssemblies\" -o=\"Library/BuildPlayerData/Editor\" -rn=\"\" -tn=\"TypeDb-All.json\"",
-=======
       "Action": "\"C:/Program Files/Unity/Hub/Editor/6000.2.6f2/Editor/Data\\Tools\\netcorerun\\netcorerun.exe\" \"C:/Program Files/Unity/Hub/Editor/6000.2.6f2/Editor/Data/Tools/BuildPlayerDataGenerator/BuildPlayerDataGenerator.exe\" -a=\"C:\\Users\\jeffp\\OneDrive\\Documents\\Github Projects\\CISC486-Game-Dev-Killer-Escape\\Killer-Escape\\Library\\ScriptAssemblies\\Assembly-CSharp.dll\" -a=\"C:\\Users\\jeffp\\OneDrive\\Documents\\Github Projects\\CISC486-Game-Dev-Killer-Escape\\Killer-Escape\\Library\\ScriptAssemblies\\Unity.Multiplayer.Center.Common.dll\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.2.6f2\\Editor\\Data\\Managed\\UnityEngine\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.2.6f2\\Editor\\Data\\NetStandard\\compat\\2.1.0\\shims\\netfx\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.2.6f2\\Editor\\Data\\NetStandard\\compat\\2.1.0\\shims\\netstandard\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.2.6f2\\Editor\\Data\\NetStandard\\EditorExtensions\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.2.6f2\\Editor\\Data\\NetStandard\\Extensions\\2.0.0\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.2.6f2\\Editor\\Data\\NetStandard\\ref\\2.1.0\" -s=\"C:\\Users\\jeffp\\OneDrive\\Documents\\Github Projects\\CISC486-Game-Dev-Killer-Escape\\Killer-Escape\\Library\\ScriptAssemblies\" -o=\"Library/BuildPlayerData/Editor\" -rn=\"\" -tn=\"TypeDb-All.json\"",
->>>>>>> NPC-FSM
       "Inputs": [
         "C:/Program Files/Unity/Hub/Editor/6000.2.6f2/Editor/Data/Tools/netcorerun/netcorerun.exe",
         "C:/Program Files/Unity/Hub/Editor/6000.2.6f2/Editor/Data/Tools/BuildPlayerDataGenerator/BuildPlayerDataGenerator.exe",
