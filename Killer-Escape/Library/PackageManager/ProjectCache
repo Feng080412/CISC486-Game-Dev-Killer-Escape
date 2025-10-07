@@ -1,25 +1,33 @@
 m_ProjectFiles:
   m_ManifestFileStatus:
-    m_FilePath: C:/Users/Owner/Documents/AAAAAAA- VIDEO GAME FOR CLASS GITHUB/CISC486-Game-Dev-Killer-Escape/Killer-Escape/Packages/manifest.json
+    m_FilePath: C:/Users/jeffp/OneDrive/Documents/Github Projects/CISC486-Game-Dev-Killer-Escape/Killer-Escape/Packages/manifest.json
     m_PathExists: 1
     m_ContentTrackingEnabled: 1
     m_ModificationDate:
       serializedVersion: 2
-      ticks: 638947983989220044
-    m_Hash: 205969706
+      ticks: 638951301035018239
+    m_Hash: 667505191
   m_LockFileStatus:
-    m_FilePath: C:/Users/Owner/Documents/AAAAAAA- VIDEO GAME FOR CLASS GITHUB/CISC486-Game-Dev-Killer-Escape/Killer-Escape/Packages/packages-lock.json
+    m_FilePath: C:/Users/jeffp/OneDrive/Documents/Github Projects/CISC486-Game-Dev-Killer-Escape/Killer-Escape/Packages/packages-lock.json
     m_PathExists: 1
     m_ContentTrackingEnabled: 1
     m_ModificationDate:
       serializedVersion: 2
+<<<<<<< HEAD
       ticks: 638951320374208474
+=======
+      ticks: 638951315373090645
+>>>>>>> NPC-FSM
     m_Hash: 1957323701
 m_EmbeddedPackageManifests:
   m_ManifestsStatus: {}
 m_LocalPackages:
   m_LocalFileStatus: []
+<<<<<<< HEAD
 m_ProjectPath: C:/Users/Owner/Documents/AAAAAAA- VIDEO GAME FOR CLASS GITHUB/CISC486-Game-Dev-Killer-Escape/Killer-Escape/Packages
+=======
+m_ProjectPath: C:/Users/jeffp/OneDrive/Documents/Github Projects/CISC486-Game-Dev-Killer-Escape/Killer-Escape/Packages
+>>>>>>> NPC-FSM
 m_EditorVersion: 6000.2.6f2 (4a4dcaec6541)
 m_ResolvedPackages:
 - packageId: com.unity.multiplayer.center@1.0.0
@@ -27,7 +35,7 @@ m_ResolvedPackages:
   isDirectDependency: 1
   version: 1.0.0
   source: 2
-  resolvedPath: C:\Users\Owner\Documents\AAAAAAA- VIDEO GAME FOR CLASS GITHUB\CISC486-Game-Dev-Killer-Escape\Killer-Escape\Library\PackageCache\com.unity.multiplayer.center@f3fb577b3546
+  resolvedPath: C:\Users\jeffp\OneDrive\Documents\Github Projects\CISC486-Game-Dev-Killer-Escape\Killer-Escape\Library\PackageCache\com.unity.multiplayer.center@f3fb577b3546
   assetPath: Packages/com.unity.multiplayer.center
   name: com.unity.multiplayer.center
   displayName: Multiplayer Center

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 017bf772e65ce5e4c831863a9da7a1aa
+timeCreated: 1475861693
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 73409
+  packageName: Butcher The Murderer - PBR
+  packageVersion: 1.0
+  assetPath: Assets/Butcher/Materials/WeaponsClean.mat
+  uploadId: 145518
