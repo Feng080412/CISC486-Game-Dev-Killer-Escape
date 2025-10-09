@@ -14,16 +14,25 @@ public class KillerAI : MonoBehaviour
     private NavMeshAgent agent;
     private Animator animator;
 
+    private float currentAnimSpeed = 0f;
+    public float speedSmoothTime = 0.1f;
+    private float speedVelocity;
+
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
+        //dealing with foot hover
+        agent.baseOffset = -0.2f;
 
         if (waypoints.Length > 0)
         {
             agent.SetDestination(waypoints[currentWaypointIndex].position);
         }
+
+        animator.applyRootMotion = false;
     }
 
     // Update is called once per frame
@@ -31,13 +40,11 @@ public class KillerAI : MonoBehaviour
     {
         PatrolLogic();
         DetectPlayer();
+        UpdateAnimatorSpeed();
     }
 
     void PatrolLogic()
     {
-        animator.SetBool("isPatrolling", true);
-        animator.SetFloat("speed", agent.velocity.magnitude);
-
         if (!agent.pathPending && agent.remainingDistance < 0.5f)
         {
             // Move to next waypoint
@@ -60,5 +67,18 @@ public class KillerAI : MonoBehaviour
         {
             animator.SetBool("playerInSight", false);
         }
+    }
+
+    void UpdateAnimatorSpeed()
+    {
+        float targetSpeed = agent.velocity.magnitude / agent.speed;
+
+    // Smooth the animation speed to avoid flicker
+    currentAnimSpeed = Mathf.SmoothDamp(currentAnimSpeed, targetSpeed, ref speedVelocity, speedSmoothTime);
+
+    // Clamp in case agent.speed is 0
+    currentAnimSpeed = Mathf.Clamp01(currentAnimSpeed);
+
+    animator.SetFloat("speed", currentAnimSpeed);
     }
 }
