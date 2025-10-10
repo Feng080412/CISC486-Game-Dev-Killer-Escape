@@ -440,6 +440,10 @@ PrefabInstance:
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: 3e1a079440ecfd045b7b22937e0858c5, type: 2}
+    - target: {fileID: 9500000, guid: e03a17ba0b120154589c0027a8b27180, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -495,7 +499,10 @@ MonoBehaviour:
   - {fileID: 31735134}
   player: {fileID: 1151146898}
   detectionRange: 5
-  speedSmoothTime: 0.1
+  attackRange: 2
+  chaseSpeed: 6
+  patrolSpeed: 3
+  slashDistance: 1.5
 --- !u!1 &757873810
 GameObject:
   m_ObjectHideFlags: 0
