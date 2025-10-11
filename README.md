@@ -27,7 +27,6 @@ https://youtu.be/-MwOu3877Ig
 ## 🤖 AI Design
 
 ### Killer FSM
-- **Idle** – Optional startup delay before entering patrol.  
 - **Patrol** – Roams waypoints, listens for sounds, looks for silhouettes.  
 - **Place Trap** – Semi-random trap placement to slow/alert on trigger.  
 - **Investigate** – Moves to last sound/sighting, performs scan.  
