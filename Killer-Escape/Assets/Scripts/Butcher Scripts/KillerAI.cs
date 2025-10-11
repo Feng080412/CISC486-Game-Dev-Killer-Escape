@@ -47,6 +47,17 @@ public class KillerAI : MonoBehaviour
     private bool _isAttacking = false;
     private bool _isPlayerDead = false;
 
+    // --- Camera lock during slash ---
+    [SerializeField] private bool lockCameraDuringSlash = true;  // turn on/off in Inspector
+    [SerializeField] private float cameraTurnSpeed = 180f;       // deg/sec smoothing
+    [SerializeField] private float  cameraSnapFirstFrame = 1f;   // 1 = snap instantly, 0 = no snap
+    [SerializeField] private float  cameraMinDistance = 1.2f;    // prevent too-close framing
+    [SerializeField] private Vector3 cameraAimOffset = new Vector3(0f, 0.12f, 0f); // up a bit
+    [SerializeField] private Transform cameraLookTarget;          // assign killer head/chest; falls back automatically
+
+    private Coroutine _camLockCR;
+
+
     private Coroutine _blockInputsCR; // handle to input-block coroutine
 
     // Animator parameter hashes (faster & less typo-prone)
@@ -63,7 +74,7 @@ public class KillerAI : MonoBehaviour
         _agent = GetComponent<NavMeshAgent>();
         _anim  = GetComponent<Animator>();
 
-        // Soft guardrails in case player is not assigned yet
+        // Soft guardrails 
         if (player == null)
         {
             Debug.LogError("[KillerAI] Player reference is missing.", this);
@@ -80,6 +91,14 @@ public class KillerAI : MonoBehaviour
         _agent.speed = patrolSpeed;
         GoToNextWaypoint();
         SetAnim(patrol: true, chase: false, slash: false);
+
+        if (cameraLookTarget == null)
+        {
+        var a = GetComponent<Animator>();
+        if (a != null && a.isHuman)
+            cameraLookTarget = a.GetBoneTransform(HumanBodyBones.Head);
+        if (cameraLookTarget == null) cameraLookTarget = transform; // fallback
+        }
     }
 
     private void Update()
@@ -172,13 +191,18 @@ public class KillerAI : MonoBehaviour
         _agent.ResetPath();
         _agent.velocity = Vector3.zero;
 
+        _agent.updateRotation = false;
+
         // Snap in front of player & face them for the slash
         PositionInFrontOfPlayer();
         FacePlayer();
 
         // Disable all player inputs/camera control
         DisableAllInputs();
-
+        // >>> NEW: keep the camera aimed at the killer while attacking
+        if (lockCameraDuringSlash && _camLockCR == null)
+            _camLockCR = StartCoroutine(LockCameraOnKiller());
+        
         // Trigger slash animation
         SetAnim(patrol: false, chase: false, slash: true);
 
@@ -236,11 +260,50 @@ public class KillerAI : MonoBehaviour
     // ---------------------------
     // Input Lockdown
     // ---------------------------
+    private IEnumerator LockCameraOnKiller()
+    {
+        var cam = Camera.main;
+        if (!cam) { _camLockCR = null; yield break; }
 
-    /// <summary>
+        // SNAP on the first frame so target is exactly centered immediately
+        Vector3 targetPos = (cameraLookTarget ? cameraLookTarget.position : transform.position) + cameraAimOffset;
+        Vector3 to = targetPos - cam.transform.position;
+        if (to.sqrMagnitude > 1e-6f)
+            cam.transform.rotation = Quaternion.LookRotation(to.normalized, Vector3.up);
+
+        yield return null; // first-frame snap done
+
+        // Smoothly keep it centered while attacking
+        while (_isAttacking && !_isPlayerDead)
+        {
+            // Maintain a minimum distance so the model doesn't overshoot frame
+            float dist = Vector3.Distance(cam.transform.position, targetPos);
+            if (dist < cameraMinDistance)
+            {
+                Vector3 back = (cam.transform.position - targetPos).normalized;
+                cam.transform.position = targetPos + back * cameraMinDistance;
+            }
+
+            targetPos = (cameraLookTarget ? cameraLookTarget.position : transform.position) + cameraAimOffset;
+            to = targetPos - cam.transform.position;
+
+            if (to.sqrMagnitude > 1e-6f)
+            {
+                Quaternion want = Quaternion.LookRotation(to.normalized, Vector3.up);
+                cam.transform.rotation = Quaternion.RotateTowards(
+                    cam.transform.rotation, want, cameraTurnSpeed * Time.deltaTime);
+            }
+
+            yield return null;
+        }
+
+        _camLockCR = null;
+    }
+
+
+
     /// Disables known movement/camera scripts and continually clears input axes.
     /// Keeps doing so while attacking or after player death.
-    /// </summary>
     private void DisableAllInputs()
     {
         Debug.Log("=== ATTEMPTING TO DISABLE INPUTS ===");
@@ -359,7 +422,7 @@ public class KillerAI : MonoBehaviour
         SetAnim(patrol: false, chase: false, slash: false);
 
         _agent.isStopped = true;
-
+        _agent.updateRotation = true;  // ensure agent can rotate again later
         // Inputs remain disabled due to the coroutine while _isPlayerDead is true
         TriggerGameOver();
     }
