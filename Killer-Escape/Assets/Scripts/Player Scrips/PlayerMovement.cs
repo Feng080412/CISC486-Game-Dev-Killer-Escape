@@ -8,7 +8,6 @@ public class PlayerMovement : MonoBehaviour
     public float crouchMult;
 
     public float groundDrag;
-
     public float jumpForce;
     public float jumpCool;
     public float airMult;
@@ -42,10 +41,11 @@ public class PlayerMovement : MonoBehaviour
 
     
 
-    float horizontalInput;
-    float verticalInput;
+    private float horizontalInput;
+    private float verticalInput;
+    private Vector3 moveDirection;
 
-    Vector3 moveDirection;
+    private Rigidbody rb;
 
     Rigidbody rb;
     
@@ -62,7 +62,6 @@ public class PlayerMovement : MonoBehaviour
         
     }
 
-    // Update is called once per frame
     void Update()
     {
         GroundCheck();
@@ -86,7 +85,6 @@ public class PlayerMovement : MonoBehaviour
     void FixedUpdate()
     {
         MovePlayer();
-
     }
 
     private void GetInput()
@@ -100,12 +98,9 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetKey(jumpKey) && jumpPossible && grounded)
         {
             jumpPossible = false;
-
             Jump();
-
             Invoke(nameof(ResetJump), jumpCool);
         }
-
     }
 
     private void CrouchCheck()
@@ -174,10 +169,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void Jump()
     {
+        // Reset vertical velocity
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-
         rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
     }
+
     private void ResetJump()
     {
         jumpPossible = true;
