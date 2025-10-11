@@ -1,6 +1,116 @@
 # 🎮 Killer Escape
 A2-video link
 https://youtu.be/-MwOu3877Ig
+A2- What we have done
+# 🧠 Killer NPC FSM — State & Transition Descriptions
+
+This document outlines the finite state machine (FSM) used to control the behavior of the Killer NPC in the *Killer Escape* game. The FSM consists of the following states: **Patrol**, **Chase**, **Slash (Attack)**, and **GameOver**.
+
+---
+
+## 📌 States
+
+### 🔷 Patrol
+
+**Purpose:** Roam between waypoints to cover the map.
+
+**Enter:**
+- `NavMeshAgent.isStopped = false`
+- `agent.speed = patrolSpeed`
+- `Animator`:
+  - `isPatrolling = true`
+  - `isChasing = false`
+  - `isSlashing = false`
+
+**Update:**
+- If close to current waypoint, move to the next.
+- Periodically scan for player (`distance <= detectionRange`).
+
+**Exit:**
+- Player detected → Transition to **Chase**
+
+---
+
+### 🔶 Chase
+
+**Purpose:** Pursue the player once detected.
+
+**Enter:**
+- `agent.speed = chaseSpeed`
+- `agent.isStopped = false`
+- `Animator`:
+  - `isChasing = true`
+  - `isPatrolling = false`
+
+**Update:**
+- Continuously `SetDestination(player.position)`
+- Maintain line-of-sight and awareness.
+- Check if within `attackRange`.
+
+**Exit:**
+- `distance <= attackRange` → Transition to **Slash**
+- `distance > detectionRange` (after optional grace period) → Transition to **Patrol**
+
+---
+
+### 🟥 Slash (Attack)
+
+**Purpose:** Play kill animation and end encounter.
+
+**Enter:**
+- Stop agent:
+  - `isStopped = true`
+  - `ResetPath()`
+  - `updateRotation = false`
+- Snap to `player.position + player.forward * slashDistance`
+- Continuously face the player (coroutine)
+- Disable player controls and camera scripts
+- Lock camera to killer
+- `Animator.isSlashing = true`
+
+**Update:**
+- Continuously face the player while animation plays
+
+**Exit:**
+- On `OnSlashAnimationComplete()` → Mark player dead and show Game Over UI
+
+---
+
+### 🏁 GameOver
+
+**Purpose:** Freeze AI and present outcome.
+
+**Enter:**
+- `_isPlayerDead = true`
+- Keep player inputs disabled
+- Show Game Over UI / play SFX / trigger restart option
+
+**Update / Exit:**
+- Terminal state for this encounter (no transition out)
+
+---
+
+## 🔁 Transitions
+
+| **From**   | **To**     | **Condition**                                        | **Side Effects**                                                                 |
+|------------|------------|------------------------------------------------------|----------------------------------------------------------------------------------|
+| Patrol     | Chase      | `distance(player) <= detectionRange`                | Set `isChasing = true`, `isPatrolling = false`, play chase SFX/UI               |
+| Chase      | Slash      | `distance(player) <= attackRange`                   | Stop agent, snap to player, disable inputs, set `isSlashing = true`             |
+| Chase      | Patrol     | `distance(player) > detectionRange`                 | Reset speed to `patrolSpeed`, resume waypoints, set `isPatrolling = true`       |
+| Slash      | GameOver   | On `OnSlashAnimationComplete()` animation event     | `_isPlayerDead = true`, freeze AI, show Game Over                               |
+
+---
+
+## ✅ Notes
+
+- The FSM logic is designed to work with Unity’s `NavMeshAgent` and `Animator` components.
+- Use coroutines to handle smooth transitions during Slash and camera lock sequences.
+- Optional transitions (like grace periods) can be fine-tuned for balance and fairness.
+
+---
+
+📁 For more implementation details, refer to the `KillerAI.cs` script in the project’s `Scripts/AI/` directory.
+
 ## 📌 Overview
 *Killer Escape* is a **3D first-person survival horror and puzzle game** where one or two players explore a seemingly abandoned building. After finding a way into the main area, they are captured by the being within and dragged into the deepest depths of the structure. Players must use their **wits and stealth abilities** to escape without being caught again.
 
