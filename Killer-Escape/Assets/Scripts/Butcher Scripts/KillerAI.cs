@@ -301,13 +301,13 @@ public class KillerAI : MonoBehaviour
 
     private void DisableAllOfType<T>(string label) where T : Behaviour
     {
-        var all = FindObjectsOfType<T>();
+        var all = FindObjectsByType<T>(FindObjectsSortMode.None);
         foreach (var c in all)
         {
             if (c.enabled)
             {
                 c.enabled = false;
-                Debug.Log($"✓ {label} disabled via FindObjectsOfType: {c.gameObject.name}");
+                Debug.Log($"✓ {label} disabled via FindObjectsByType: {c.gameObject.name}");
             }
         }
     }
@@ -327,10 +327,10 @@ public class KillerAI : MonoBehaviour
                 if (pm != null && pm.enabled) pm.enabled = false;
             }
 
-            var allFpc = FindObjectsOfType<FirstPersonCam>();
+            var allFpc = FindObjectsByType<FirstPersonCam>(FindObjectsSortMode.None);
             foreach (var cam in allFpc) if (cam.enabled) cam.enabled = false;
 
-            var allMove = FindObjectsOfType<MoveCam>();
+            var allMove = FindObjectsByType<MoveCam>(FindObjectsSortMode.None);
             foreach (var mv in allMove) if (mv.enabled) mv.enabled = false;
 
             yield return null; // each frame
