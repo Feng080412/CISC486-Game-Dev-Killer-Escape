@@ -150,6 +150,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &411341883 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5091957145321718751, guid: 2fa8245cb3362be4193618a67ec1cd87, type: 3}
+  m_PrefabInstance: {fileID: 4516697310609741969}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &546864271
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -267,7 +272,7 @@ MonoBehaviour:
   waypoints:
   - {fileID: 757873811}
   - {fileID: 31735134}
-  player: {fileID: 0}
+  player: {fileID: 411341883}
   detectionRange: 5
   attackRange: 2
   chaseSpeed: 6
@@ -437,6 +442,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!4 &1191293562 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2313497558532429551, guid: 2fa8245cb3362be4193618a67ec1cd87, type: 3}
+  m_PrefabInstance: {fileID: 4516697310609741969}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &3402616646783551853
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -452,7 +462,7 @@ PrefabInstance:
     - target: {fileID: 2901625863056322600, guid: b3a85cae63de08b4687ce5d5f550a111, type: 3}
       propertyPath: camPos
       value: 
-      objectReference: {fileID: 1099638658}
+      objectReference: {fileID: 1191293562}
     - target: {fileID: 3830871021304405260, guid: b3a85cae63de08b4687ce5d5f550a111, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
