@@ -34,6 +34,12 @@ public class KillerAI : MonoBehaviour
     [Tooltip("Where the killer teleports relative to player forward at attack start.")]
     [Min(0f)] public float slashDistance = 1.5f;
 
+    [Header("Trap Debug")]
+    public float checkInterval = 5f;
+    public float trapChance = 0.3f;
+    public Transform trapSpawn;
+    public GameObject trapPrefab;
+
     // ---------------------------
     // Private State
     // ---------------------------
@@ -46,6 +52,7 @@ public class KillerAI : MonoBehaviour
     private bool _isChasing = false;
     private bool _isAttacking = false;
     private bool _isPlayerDead = false;
+    private bool _isPlacingTrap = false;
 
     // --- Camera lock during slash ---
     [SerializeField] private bool lockCameraDuringSlash = true;  // turn on/off in Inspector
@@ -63,7 +70,8 @@ public class KillerAI : MonoBehaviour
     // Animator parameter hashes (faster & less typo-prone)
     private static readonly int HashIsPatrolling = Animator.StringToHash("isPatrolling");
     private static readonly int HashIsChasing    = Animator.StringToHash("isChasing");
-    private static readonly int HashIsSlashing   = Animator.StringToHash("isSlashing");
+    private static readonly int HashIsSlashing = Animator.StringToHash("isSlashing");
+    private static readonly int HashIsPlacingTrap   = Animator.StringToHash("isPlacingTrap");
 
     // ---------------------------
     // Unity Lifecycle
@@ -94,11 +102,14 @@ public class KillerAI : MonoBehaviour
 
         if (cameraLookTarget == null)
         {
-        var a = GetComponent<Animator>();
-        if (a != null && a.isHuman)
-            cameraLookTarget = a.GetBoneTransform(HumanBodyBones.Head);
-        if (cameraLookTarget == null) cameraLookTarget = transform; // fallback
+            var a = GetComponent<Animator>();
+            if (a != null && a.isHuman)
+                cameraLookTarget = a.GetBoneTransform(HumanBodyBones.Head);
+            if (cameraLookTarget == null) cameraLookTarget = transform; // fallback
         }
+        
+        // Start Trap Routine (will check every __ seconds and place a trap if it passes and patroling)
+        StartCoroutine(TrapOpportunityRoutine());
     }
 
     private void Update()
@@ -137,6 +148,8 @@ public class KillerAI : MonoBehaviour
 
     private void Patrol()
     {
+        if (_isPlacingTrap) return;
+
         _agent.isStopped = false;
         _agent.speed = patrolSpeed;
 
@@ -433,5 +446,44 @@ public class KillerAI : MonoBehaviour
         // TODO: Hook up UI / sound / scene transitions here
         // Example:
         // GameOverUI.Instance?.ShowGameOver();
+    }
+
+    IEnumerator TrapOpportunityRoutine()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(checkInterval);
+
+            if (!_isAttacking && !_isChasing && Random.value < trapChance)
+            {
+                yield return StartCoroutine(PlaceTrapRoutine());
+            }
+        }
+    }
+    private IEnumerator PlaceTrapRoutine()
+    {
+        if (trapPrefab == null || trapSpawn == null)
+            yield break;
+
+        // Trigger placing animation
+        _anim.SetBool(HashIsPlacingTrap, true);
+
+        _isPlacingTrap = true;
+        _agent.isStopped = true;
+
+        // Wait for animation to finish
+        float animLength = 1f;
+        yield return new WaitForSeconds(animLength);
+
+        // Spawn trap at the spawn transform
+        Instantiate(trapPrefab, trapSpawn.position, trapSpawn.rotation);
+
+        // Reset animation
+        _anim.SetBool(HashIsPlacingTrap, false);
+
+        // Resume patrol
+        _isPlacingTrap = false;
+        _agent.isStopped = false;
+        
     }
 }

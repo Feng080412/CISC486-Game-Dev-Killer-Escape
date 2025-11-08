@@ -213,3 +213,6 @@ E        - Interact (pick up, drop, close door, disarm)
 Q        - Drop held item
 Ctrl     - Crouch
 Esc      - Pause
+
+## Credits for assets
+"#30 Fly Trap - Catch "Inktober2019" (https://skfb.ly/6WPMN) by Canary Games is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).

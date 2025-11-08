@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -17,6 +18,8 @@ public class PlayerMovement : MonoBehaviour
     bool jumpPossible;
     bool sprinting;
     bool crouched;
+
+    public bool isStunned = false;
 
     [Header("Keybinds")]
     public KeyCode jumpKey = KeyCode.Space; 
@@ -68,9 +71,12 @@ public class PlayerMovement : MonoBehaviour
         SpeedControl();
 
         CrouchCheck();
+        
 
         //handle drag
         rb.linearDamping = grounded ? groundDrag : 0f;
+        
+        
 
     }
 
@@ -83,7 +89,9 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
+    
         MovePlayer();
+
     }
 
     private void GetInput()
@@ -94,7 +102,7 @@ public class PlayerMovement : MonoBehaviour
         crouched = Input.GetKey(crouchKey);
 
 
-        if (Input.GetKey(jumpKey) && jumpPossible && grounded)
+        if (Input.GetKey(jumpKey) && jumpPossible && grounded && !isStunned)
         {
             jumpPossible = false;
             Jump();
@@ -135,6 +143,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void MovePlayer()
     {
+        if (isStunned) return;
         //NOTE: in scene playermaterial stops from sticking to walls
         
         moveDirection = (orientation.forward * verticalInput + orientation.right * horizontalInput).normalized;
@@ -176,5 +185,25 @@ public class PlayerMovement : MonoBehaviour
     private void ResetJump()
     {
         jumpPossible = true;
+    }
+
+    public void Stun(float duration)
+    {
+        StartCoroutine(StunRoutine(duration));
+    }
+    private IEnumerator StunRoutine(float duration)
+    {
+        isStunned = true;
+        float moveTemp = moveSpeed;
+        moveSpeed = 0f;
+        
+
+        // stop all current motion
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        yield return new WaitForSeconds(duration);
+        isStunned = false;
+        moveSpeed = moveTemp;
+
     }
 }

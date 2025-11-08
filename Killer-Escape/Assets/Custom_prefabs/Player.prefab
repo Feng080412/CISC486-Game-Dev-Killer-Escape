@@ -82,6 +82,7 @@ MonoBehaviour:
   jumpForce: 6
   jumpCool: 0.5
   airMult: 0.4
+  isStunned: 0
   jumpKey: 32
   sprintKey: 304
   crouchKey: 306
@@ -108,7 +109,7 @@ GameObject:
   - component: {fileID: 6780163702690124223}
   m_Layer: 0
   m_Name: PlayerObj
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
