@@ -28,6 +28,7 @@ This document outlines the finite state machine (FSM) used to control the behavi
 
 **Exit:**
 - Player detected → Transition to **Chase**
+- Random Chance on Interval → Transition to **Place Trap**
 
 ---
 
@@ -73,6 +74,28 @@ This document outlines the finite state machine (FSM) used to control the behavi
 
 **Exit:**
 - On `OnSlashAnimationComplete()` → Mark player dead and show Game Over UI
+
+---
+---
+
+### 🟥 Place Trap 
+
+**Purpose:** Play trap placing animation and spawn bear trap entity.
+
+**Enter:**
+- Stop agent:
+  - `isStopped = true`
+- Trigger animation change and Institate entity
+- `Animator.isPlacingTrap = true`
+
+**Update:**
+- Wait until animation finishes (Coroutine)
+
+**Exit:**
+- After IEnumerator return
+   - `isStopped = false'
+   - return to patrol state
+   - `Animator.isPlacingTrap = false
 
 ---
 
