@@ -1,7 +1,8 @@
 using UnityEngine;
 using System.Collections;
+using Unity.Netcode;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : NetworkBehaviour
 {
     [Header("Movement")]
     public float moveSpeed;
@@ -52,6 +53,7 @@ public class PlayerMovement : MonoBehaviour
 
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
+    
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -66,6 +68,9 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+
+        if (!IsOwner) return;
+
         GroundCheck();
         GetInput();
         SpeedControl();
@@ -89,7 +94,7 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-    
+        if (!IsOwner) return;
         MovePlayer();
 
     }
