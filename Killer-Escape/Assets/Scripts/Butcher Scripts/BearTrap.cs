@@ -9,6 +9,8 @@ public class BearTrap : NetworkBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (!IsServer) return;
+
         if (!other.CompareTag("Player")) return;
 
         // Look for NetworkObject on self or parent
@@ -28,7 +30,7 @@ public class BearTrap : NetworkBehaviour
         var playerState = playerObj.GetComponent<PlayerState>();
         if (playerState != null)
         {
-            playerState.StunPlayerServerRpc(stunDuration);
+            playerState.StunPlayer(stunDuration);
         }
 
         // Play animation for all clients

@@ -6,10 +6,8 @@ public class PlayerState : NetworkBehaviour
 {
     public PlayerMovement movement;
 
-    public NetworkVariable<bool> isStunned = new NetworkVariable<bool>(false);
     public NetworkVariable<bool> isDead = new NetworkVariable<bool>(false);
 
-    private float pendingStunDuration = 0f;
 
     private void Awake()
     {
@@ -19,23 +17,9 @@ public class PlayerState : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        isStunned.OnValueChanged += OnStunChanged;
         isDead.OnValueChanged += OnDeathChanged;
     }
 
-    private void OnStunChanged(bool previous, bool current)
-    {
-         if (movement != null)
-        {
-            // If current is true, use the duration already stored somewhere
-            // We'll store the duration temporarily in PlayerState
-            if (current && pendingStunDuration > 0f)
-            {
-                movement.Stun(pendingStunDuration);
-                pendingStunDuration = 0f; // reset
-            }
-        }
-    }
 
     private void OnDeathChanged(bool previous, bool current)
     {
@@ -69,26 +53,38 @@ public class PlayerState : NetworkBehaviour
         }
     }
 
-
-    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
-    public void StunPlayerServerRpc(float duration)
+    [ClientRpc]
+    private void HidePlayerClientRpc()
     {
-        pendingStunDuration = duration;
-        isStunned.Value = true;
-        StartCoroutine(ResetStun(duration));
+        // Disable mesh, collider, rigidbody for visual clarity
+        foreach (var mr in GetComponentsInChildren<MeshRenderer>())
+            mr.enabled = false;
+        var col = GetComponent<Collider>();
+        if (col != null) col.enabled = false;
+
+        var rb = GetComponent<Rigidbody>();
+        if (rb != null) rb.isKinematic = true;
+    }
+    
+    public void StunPlayer(float duration)
+    {
+        if (!IsServer) return;
+        ApplyStunClientRpc(duration);
     }
 
-    private System.Collections.IEnumerator ResetStun(float duration)
+    [ClientRpc]
+    private void ApplyStunClientRpc(float duration)
     {
-        yield return new WaitForSeconds(duration);
-        isStunned.Value = false;
+        movement.Stun(duration);
     }
 
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     public void KillPlayerServerRpc()
     {
+        if (!IsServer) return;
+
         isDead.Value = true;
-        
-        
+
+        HidePlayerClientRpc();
     }
 }

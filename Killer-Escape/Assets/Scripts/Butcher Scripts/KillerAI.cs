@@ -462,6 +462,8 @@ public class KillerAI : NetworkBehaviour
         {
             yield return new WaitForSeconds(checkInterval);
 
+            if (!IsServer) continue;
+
             if (!_isAttacking && !_isChasing && Random.value < trapChance)
             {
                 yield return StartCoroutine(PlaceTrapRoutine());
@@ -470,6 +472,9 @@ public class KillerAI : NetworkBehaviour
     }
     private IEnumerator PlaceTrapRoutine()
     {
+        if (!IsServer)
+            yield break; // immediately exit if this is a client
+
         if (trapPrefab == null || trapSpawn == null)
             yield break;
 
@@ -486,7 +491,7 @@ public class KillerAI : NetworkBehaviour
         // Spawn trap at the spawn transform
         var trapInstance = Instantiate(trapPrefab, trapSpawn.position, trapSpawn.rotation);
         var netObj = trapInstance.GetComponent<NetworkObject>();
-        if (netObj != null && NetworkManager.Singleton.IsServer)
+        if (netObj != null)
         {
             netObj.Spawn(); // Sync with all clients
         }

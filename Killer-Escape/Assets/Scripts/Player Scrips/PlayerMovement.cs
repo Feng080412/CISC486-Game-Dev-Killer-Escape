@@ -196,7 +196,7 @@ public class PlayerMovement : NetworkBehaviour
     {
         StartCoroutine(StunRoutine(duration));
     }
-    
+
     private IEnumerator StunRoutine(float duration)
     {
         isStunned = true;
@@ -205,11 +205,28 @@ public class PlayerMovement : NetworkBehaviour
         
 
         // stop all current motion
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
+        if (!rb.isKinematic)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+        
         yield return new WaitForSeconds(duration);
         isStunned = false;
         moveSpeed = moveTemp;
 
+    }
+
+    public void StunInfinite()
+    {
+        StopAllCoroutines(); // prevent stacking
+        isStunned = true;
+        rb.linearVelocity = Vector3.zero;
+    }
+
+    public void Unstun()
+    {
+        StopAllCoroutines();
+        isStunned = false;
     }
 }
