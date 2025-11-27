@@ -207,10 +207,16 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 002c10610297e8d49a1e9f6fa5a6a41a, type: 3}
       insertIndex: -1
+      addedObject: {fileID: -3558093732417097532}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 002c10610297e8d49a1e9f6fa5a6a41a, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 8937774746510754182}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 002c10610297e8d49a1e9f6fa5a6a41a, type: 3}
       insertIndex: -1
       addedObject: {fileID: -3563144900510838406}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 002c10610297e8d49a1e9f6fa5a6a41a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5102593561191870882}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 002c10610297e8d49a1e9f6fa5a6a41a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3208218371121852502}
@@ -225,6 +231,31 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 002c10610297e8d49a1e9f6fa5a6a41a, type: 3}
   m_PrefabInstance: {fileID: 6899869221390717417}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &-3558093732417097532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5980828331835665592}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 2562886456
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &8937774746510754182
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -237,6 +268,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c336dc2b6797bf49a33789b8d455d0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  ShowTopMostFoldoutHeaderGroup: 1
   animator: {fileID: 3208218371121852502}
   stunDuration: 2
   destroyDelay: 1.5
@@ -261,6 +293,21 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.01, y: 0.01, z: 0.01}
   m_Center: {x: 0, y: 0, z: 0.005}
+--- !u!114 &5102593561191870882
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5980828331835665592}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkAnimator
+  ShowTopMostFoldoutHeaderGroup: 1
+  TransitionStateInfoList: []
+  m_Animator: {fileID: 3208218371121852502}
 --- !u!95 &3208218371121852502
 Animator:
   serializedVersion: 7

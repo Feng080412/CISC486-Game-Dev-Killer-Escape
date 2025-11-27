@@ -1,6 +1,8 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using Unity.Netcode;
 
 /// <summary>
 /// KillerAI
@@ -11,7 +13,7 @@ using UnityEngine.AI;
 /// </summary>
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Animator))]
-public class KillerAI : MonoBehaviour
+public class KillerAI : NetworkBehaviour
 {
     // ---------------------------
     // Inspector (Gameplay Tuning)
@@ -21,8 +23,10 @@ public class KillerAI : MonoBehaviour
     [Tooltip("Waypoints the killer will patrol in order.")]
     public Transform[] waypoints;
 
-    [Tooltip("Reference to the player transform.")]
-    public Transform player;
+    [Tooltip("Reference to the player transform/transforms.")]
+    private List<Transform> players = new List<Transform>();
+    //current targer
+    private Transform player;
 
     [Header("Ranges & Speeds")]
     [Min(0f)] public float detectionRange = 10f;
@@ -83,10 +87,11 @@ public class KillerAI : MonoBehaviour
         _anim  = GetComponent<Animator>();
 
         // Soft guardrails 
-        if (player == null)
-        {
-            Debug.LogError("[KillerAI] Player reference is missing.", this);
-        }
+        // if (player == null)
+        // {
+        //     Debug.LogError("[KillerAI] Player reference is missing.", this);
+        // }
+        // ABOVE COMMENTED BECAUSE OF NETCODE
         if (waypoints == null || waypoints.Length == 0)
         {
             Debug.LogWarning("[KillerAI] No waypoints assigned. Killer will stand still in Patrol.", this);
@@ -114,13 +119,32 @@ public class KillerAI : MonoBehaviour
 
     private void Update()
     {
+        if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsServer)  return; // Only server controls AI
+
+        UpdatePlayersList();
+
+        if (players.Count == 0) return;
+
         if (_isPlayerDead || _isAttacking)
             return;
 
-        if (player == null) // Nothing to do without a player reference
-            return;
+        Transform nearestPlayer = null;
+        float nearestDist = Mathf.Infinity;
 
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+        foreach (var p in players)
+        {
+            float dist = Vector3.Distance(transform.position, p.position);
+            if (dist < nearestDist)
+            {
+                nearestDist = dist;
+                nearestPlayer = p;
+            }
+        }
+
+        if (nearestPlayer == null) return;
+
+        float distanceToPlayer = nearestDist;
+        player = nearestPlayer;
 
         // Attack takes precedence
         if (distanceToPlayer <= attackRange)
@@ -146,6 +170,17 @@ public class KillerAI : MonoBehaviour
     // High-level Behaviors
     // ---------------------------
 
+    private void UpdatePlayersList()
+    {
+        players.Clear();
+        foreach (var netObj in FindObjectsOfType<NetworkObject>())
+        {
+            if (netObj.IsPlayerObject)
+            {
+                players.Add(netObj.transform);
+            }
+        }
+    }
     private void Patrol()
     {
         if (_isPlacingTrap) return;
@@ -211,11 +246,18 @@ public class KillerAI : MonoBehaviour
         FacePlayer();
 
         // Disable all player inputs/camera control
-        DisableAllInputs();
-        // >>> NEW: keep the camera aimed at the killer while attacking
+        if (NetworkManager.Singleton.IsServer)
+        {
+            NetworkObjectReference playerRef = new NetworkObjectReference(player.GetComponent<NetworkObject>());
+            var playerState = player.GetComponent<PlayerState>();
+            if (playerState != null)
+            {
+                playerState.KillPlayerServerRpc();
+            }
+        }
+
         if (lockCameraDuringSlash && _camLockCR == null)
             _camLockCR = StartCoroutine(LockCameraOnKiller());
-        
         // Trigger slash animation
         SetAnim(patrol: false, chase: false, slash: true);
 
@@ -317,104 +359,57 @@ public class KillerAI : MonoBehaviour
 
     /// Disables known movement/camera scripts and continually clears input axes.
     /// Keeps doing so while attacking or after player death.
-    private void DisableAllInputs()
+    [ServerRpc]
+    private void OnPlayerHitServerRpc(NetworkObjectReference playerRef)
     {
-        Debug.Log("=== ATTEMPTING TO DISABLE INPUTS ===");
+        // Server tells that specific client to disable their input
+        DisablePlayerInputClientRpc(playerRef);
+    }
+    [ClientRpc]
+    private void DisablePlayerInputClientRpc(NetworkObjectReference playerRef)
+    {
+        if (!playerRef.TryGet(out var netObj)) return;
 
-        // 1) Disable a known player movement script if present
-        if (player != null)
+        if (netObj.IsOwner)
         {
-            var playerMovement = player.GetComponent<PlayerMovement>();
-            if (playerMovement != null)
-            {
-                playerMovement.enabled = false;
-                Debug.Log("✓ PlayerMovement disabled on: " + playerMovement.gameObject.name);
-            }
-            else
-            {
-                Debug.Log("✗ PlayerMovement not found on player object");
-            }
+            // Disable movement
+            var movement = netObj.GetComponent<PlayerMovement>();
+            if (movement != null) movement.Stun(999f); //effectively a kill
+
+            // Disable camera on the same player prefab
+            var cam = netObj.GetComponentInChildren<FirstPersonCam>();
+            if (cam != null) cam.enabled = false;
         }
-
-        // 2) Camera scripts on Main Camera or children
-        Camera mainCam = Camera.main;
-        if (mainCam != null)
-        {
-            DisableIfPresentOn<FirstPersonCam>(mainCam.transform, "FirstPersonCam");
-            DisableIfPresentOn<MoveCam>(mainCam.transform, "MoveCam");
-        }
-        else
-        {
-            Debug.Log("✗ Main camera not found");
-        }
-
-        // 3) Nuclear option: disable all such scripts scene-wide
-        DisableAllOfType<FirstPersonCam>("FirstPersonCam");
-        DisableAllOfType<MoveCam>("MoveCam");
-
-        // 4) Clear input axes now (legacy input system)
-        Input.ResetInputAxes();
-        Debug.Log("=== INPUT DISABLE COMPLETE ===");
-
-        // Ensure continuous blocking while attacking/dead
-        if (_blockInputsCR == null)
-            _blockInputsCR = StartCoroutine(BlockInputsContinuously());
+       
     }
 
-    private void DisableIfPresentOn<T>(Transform root, string label) where T : Behaviour
-    {
-        var comp = root.GetComponent<T>() ?? root.GetComponentInChildren<T>(true);
-        if (comp != null && comp.enabled)
-        {
-            comp.enabled = false;
-            Debug.Log($"✓ {label} disabled on: {comp.gameObject.name}");
-        }
-        else
-        {
-            Debug.Log($"✗ {label} not found/enabled on camera hierarchy");
-        }
-    }
+    // private void DisableIfPresentOn<T>(Transform root, string label) where T : Behaviour
+    // {
+    //     var comp = root.GetComponent<T>() ?? root.GetComponentInChildren<T>(true);
+    //     if (comp != null && comp.enabled)
+    //     {
+    //         comp.enabled = false;
+    //         Debug.Log($"✓ {label} disabled on: {comp.gameObject.name}");
+    //     }
+    //     else
+    //     {
+    //         Debug.Log($"✗ {label} not found/enabled on camera hierarchy");
+    //     }
+    // }
 
-    private void DisableAllOfType<T>(string label) where T : Behaviour
-    {
-        var all = FindObjectsByType<T>(FindObjectsSortMode.None);
-        foreach (var c in all)
-        {
-            if (c.enabled)
-            {
-                c.enabled = false;
-                Debug.Log($"✓ {label} disabled via FindObjectsByType: {c.gameObject.name}");
-            }
-        }
-    }
+    // private void DisableAllOfType<T>(string label) where T : Behaviour
+    // {
+    //     var all = FindObjectsByType<T>(FindObjectsSortMode.None);
+    //     foreach (var c in all)
+    //     {
+    //         if (c.enabled)
+    //         {
+    //             c.enabled = false;
+    //             Debug.Log($"✓ {label} disabled via FindObjectsByType: {c.gameObject.name}");
+    //         }
+    //     }
+    // }
 
-    private IEnumerator BlockInputsContinuously()
-    {
-        // Keep inputs neutralized while the kill sequence is active or after death
-        while (_isAttacking || _isPlayerDead)
-        {
-            // (Legacy input system) Clear buffered inputs; prevents new deltas from accumulating
-            Input.ResetInputAxes();
-
-            // Double-check player & camera scripts remain off
-            if (player != null)
-            {
-                var pm = player.GetComponent<PlayerMovement>();
-                if (pm != null && pm.enabled) pm.enabled = false;
-            }
-
-            var allFpc = FindObjectsByType<FirstPersonCam>(FindObjectsSortMode.None);
-            foreach (var cam in allFpc) if (cam.enabled) cam.enabled = false;
-
-            var allMove = FindObjectsByType<MoveCam>(FindObjectsSortMode.None);
-            foreach (var mv in allMove) if (mv.enabled) mv.enabled = false;
-
-            yield return null; // each frame
-        }
-
-        // End of lockdown, release handle
-        _blockInputsCR = null;
-    }
 
     // ---------------------------
     // Animation Events / Game Over
@@ -476,7 +471,12 @@ public class KillerAI : MonoBehaviour
         yield return new WaitForSeconds(animLength);
 
         // Spawn trap at the spawn transform
-        Instantiate(trapPrefab, trapSpawn.position, trapSpawn.rotation);
+        var trapInstance = Instantiate(trapPrefab, trapSpawn.position, trapSpawn.rotation);
+        var netObj = trapInstance.GetComponent<NetworkObject>();
+        if (netObj != null && NetworkManager.Singleton.IsServer)
+        {
+            netObj.Spawn(); // Sync with all clients
+        }
 
         // Reset animation
         _anim.SetBool(HashIsPlacingTrap, false);
