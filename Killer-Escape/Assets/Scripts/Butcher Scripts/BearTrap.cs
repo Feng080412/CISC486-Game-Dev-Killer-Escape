@@ -1,44 +1,56 @@
-using System.Collections;
 using UnityEngine;
 using Unity.Netcode;
 
 public class BearTrap : NetworkBehaviour
 {
     public Animator animator;
-    public float stunDuration = 2f; // configurable per trap
     public float destroyDelay = 1.5f;
+    public float stunDuration = 2f;
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!IsServer) return; // only the server handles logic
+        if (!other.CompareTag("Player")) return;
 
-        if (other.CompareTag("Player"))
+        // Look for NetworkObject on self or parent
+        NetworkObject playerNetObj = other.GetComponentInParent<NetworkObject>();
+        if (playerNetObj != null && other.CompareTag("Player"))
         {
-            animator?.SetTrigger("Snap");
-
-            // Attempt to get PlayerState on the hit player
-            PlayerState state = other.GetComponentInParent<PlayerState>();
-            if (state != null)
-            {
-                state.StunPlayerServerRpc(stunDuration);
-            }
-
-            StartCoroutine(DestroySelf());
+            ActivateTrapServerRpc(new NetworkObjectReference(playerNetObj));
         }
     }
 
-    private IEnumerator DestroySelf()
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void ActivateTrapServerRpc(NetworkObjectReference playerRef)
     {
-        yield return new WaitForSeconds(destroyDelay);
-        if (IsServer)
+        if (!playerRef.TryGet(out NetworkObject playerObj)) return;
+
+        // Apply stun to the player
+        var playerState = playerObj.GetComponent<PlayerState>();
+        if (playerState != null)
         {
-            NetworkObject netObj = GetComponent<NetworkObject>();
-            if (netObj != null && netObj.IsSpawned)
-                netObj.Despawn();
-            else
-                Destroy(gameObject);
+            playerState.StunPlayerServerRpc(stunDuration);
         }
-        else
+
+        // Play animation for all clients
+        PlayTrapAnimationClientRpc();
+
+        // Destroy trap after delay
+        Invoke(nameof(DestroySelf), destroyDelay);
+    }
+
+    [ClientRpc]
+    private void PlayTrapAnimationClientRpc()
+    {
+        if (animator != null)
+        {
+            // Ensure this trigger exists in your Animator
+            animator.SetTrigger("Snap");
+        }
+    }
+
+    private void DestroySelf()
+    {
+        if (IsServer)
         {
             Destroy(gameObject);
         }

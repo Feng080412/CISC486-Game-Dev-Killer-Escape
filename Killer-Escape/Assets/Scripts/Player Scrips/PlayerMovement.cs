@@ -196,6 +196,7 @@ public class PlayerMovement : NetworkBehaviour
     {
         StartCoroutine(StunRoutine(duration));
     }
+    
     private IEnumerator StunRoutine(float duration)
     {
         isStunned = true;

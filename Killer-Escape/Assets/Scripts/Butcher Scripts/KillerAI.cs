@@ -24,7 +24,7 @@ public class KillerAI : NetworkBehaviour
     public Transform[] waypoints;
 
     [Tooltip("Reference to the player transform/transforms.")]
-    private List<Transform> players = new List<Transform>();
+    private List<Transform> alivePlayers = new List<Transform>();
     //current targer
     private Transform player;
 
@@ -123,15 +123,15 @@ public class KillerAI : NetworkBehaviour
 
         UpdatePlayersList();
 
-        if (players.Count == 0) return;
+        if (alivePlayers.Count == 0) return;
 
-        if (_isPlayerDead || _isAttacking)
+        if (_isAttacking)
             return;
 
         Transform nearestPlayer = null;
         float nearestDist = Mathf.Infinity;
 
-        foreach (var p in players)
+        foreach (var p in alivePlayers)
         {
             float dist = Vector3.Distance(transform.position, p.position);
             if (dist < nearestDist)
@@ -172,12 +172,14 @@ public class KillerAI : NetworkBehaviour
 
     private void UpdatePlayersList()
     {
-        players.Clear();
+        alivePlayers.Clear();
         foreach (var netObj in FindObjectsOfType<NetworkObject>())
         {
             if (netObj.IsPlayerObject)
             {
-                players.Add(netObj.transform);
+                var playerState = netObj.GetComponent<PlayerState>();
+                if (playerState != null && !playerState.isDead.Value)
+                    alivePlayers.Add(netObj.transform);
             }
         }
     }
@@ -253,6 +255,7 @@ public class KillerAI : NetworkBehaviour
             if (playerState != null)
             {
                 playerState.KillPlayerServerRpc();
+                alivePlayers.Remove(player); 
             }
         }
 
@@ -301,6 +304,8 @@ public class KillerAI : NetworkBehaviour
             transform.rotation = Quaternion.LookRotation(dir.normalized);
         }
     }
+    
+
 
     /// <summary>
     /// Sets animator parameters in one place.
@@ -420,19 +425,27 @@ public class KillerAI : NetworkBehaviour
     /// </summary>
     public void OnSlashAnimationComplete()
     {
-        if (_isPlayerDead) return;
+        if (player == null) return;
 
-        Debug.Log("Slash animation complete - GAME OVER");
+        // Kill the player
+        var playerState = player.GetComponent<PlayerState>();
+        if (playerState != null)
+            playerState.KillPlayerServerRpc();
 
-        _isPlayerDead = true;
+        // Remove player from AI's alive list immediately
+        alivePlayers.Remove(player);
+        player = null;
+
+        // Stop slash animation
+        SetAnim(patrol:false, chase:false, slash:false);
+
+        // Reset killer state
         _isAttacking = false;
+        _agent.isStopped = false;
+        _agent.updateRotation = true;
 
-        SetAnim(patrol: false, chase: false, slash: false);
-
-        _agent.isStopped = true;
-        _agent.updateRotation = true;  // ensure agent can rotate again later
-        // Inputs remain disabled due to the coroutine while _isPlayerDead is true
-        TriggerGameOver();
+        // Resume patroling
+        GoToNextWaypoint();
     }
 
     private void TriggerGameOver()
