@@ -37,6 +37,8 @@ public class KillerAI : NetworkBehaviour
     [Header("Attack")]
     [Tooltip("Where the killer teleports relative to player forward at attack start.")]
     [Min(0f)] public float slashDistance = 1.5f;
+    [Tooltip("Auto-resume patrol after this time if animation event fails")]
+    public float slashAnimationTimeout = 3f;
 
     [Header("Trap Debug")]
     public float checkInterval = 5f;
@@ -57,6 +59,9 @@ public class KillerAI : NetworkBehaviour
     private bool _isAttacking = false;
     private bool _isPlayerDead = false;
     private bool _isPlacingTrap = false;
+
+    // Animation tracking
+    private Coroutine _slashTimeoutCoroutine;
 
     // --- Camera lock during slash ---
     [SerializeField] private bool lockCameraDuringSlash = true;  // turn on/off in Inspector
@@ -87,14 +92,22 @@ public class KillerAI : NetworkBehaviour
         _anim  = GetComponent<Animator>();
 
         // Soft guardrails 
-        // if (player == null)
-        // {
-        //     Debug.LogError("[KillerAI] Player reference is missing.", this);
-        // }
-        // ABOVE COMMENTED BECAUSE OF NETCODE
         if (waypoints == null || waypoints.Length == 0)
         {
             Debug.LogWarning("[KillerAI] No waypoints assigned. Killer will stand still in Patrol.", this);
+        }
+        else
+        {
+            // Check for null waypoints on awake
+            int nullCount = 0;
+            foreach (var wp in waypoints)
+            {
+                if (wp == null) nullCount++;
+            }
+            if (nullCount > 0)
+            {
+                Debug.LogWarning($"[KillerAI] Found {nullCount} null waypoints in array. They will be skipped during patrol.", this);
+            }
         }
     }
 
@@ -123,7 +136,15 @@ public class KillerAI : NetworkBehaviour
 
         UpdatePlayersList();
 
-        if (alivePlayers.Count == 0) return;
+        if (alivePlayers.Count == 0) 
+        {
+            // No players alive, continue patrolling
+            if (!_isAttacking && !_isPlacingTrap)
+            {
+                Patrol();
+            }
+            return;
+        }
 
         if (_isAttacking)
             return;
@@ -141,7 +162,15 @@ public class KillerAI : NetworkBehaviour
             }
         }
 
-        if (nearestPlayer == null) return;
+        if (nearestPlayer == null) 
+        {
+            // No valid player found, continue patrolling
+            if (!_isAttacking && !_isPlacingTrap)
+            {
+                Patrol();
+            }
+            return;
+        }
 
         float distanceToPlayer = nearestDist;
         player = nearestPlayer;
@@ -183,9 +212,10 @@ public class KillerAI : NetworkBehaviour
             }
         }
     }
+    
     private void Patrol()
     {
-        if (_isPlacingTrap) return;
+        if (_isPlacingTrap || _isAttacking) return;
 
         _agent.isStopped = false;
         _agent.speed = patrolSpeed;
@@ -236,19 +266,20 @@ public class KillerAI : NetworkBehaviour
         _isAttacking = true;
         _isChasing = false;
 
+        Debug.Log("[KillerAI] Starting attack sequence");
+
         // Stop all NavMesh movement and clear velocity
         _agent.isStopped = true;
         _agent.ResetPath();
         _agent.velocity = Vector3.zero;
-
         _agent.updateRotation = false;
 
         // Snap in front of player & face them for the slash
         PositionInFrontOfPlayer();
         FacePlayer();
 
-        // Disable all player inputs/camera control
-        if (NetworkManager.Singleton.IsServer)
+        // Kill the player and remove from alive list
+        if (NetworkManager.Singleton.IsServer && player != null)
         {
             NetworkObjectReference playerRef = new NetworkObjectReference(player.GetComponent<NetworkObject>());
             var playerState = player.GetComponent<PlayerState>();
@@ -256,15 +287,29 @@ public class KillerAI : NetworkBehaviour
             {
                 playerState.KillPlayerServerRpc();
                 alivePlayers.Remove(player); 
+                
+                // Stop camera coroutine if the killed player was the one we're tracking
+                if (_camLockCR != null)
+                {
+                    StopCoroutine(_camLockCR);
+                    _camLockCR = null;
+                }
             }
         }
 
-        if (lockCameraDuringSlash && _camLockCR == null)
+        // Only start camera lock if we have a valid camera
+        if (lockCameraDuringSlash && _camLockCR == null && Camera.main != null)
             _camLockCR = StartCoroutine(LockCameraOnKiller());
+            
         // Trigger slash animation
         SetAnim(patrol: false, chase: false, slash: true);
 
-        Debug.Log("[KillerAI] DEATH SLASH - Inputs disabled");
+        // Start timeout coroutine in case animation event fails
+        if (_slashTimeoutCoroutine != null)
+            StopCoroutine(_slashTimeoutCoroutine);
+        _slashTimeoutCoroutine = StartCoroutine(SlashTimeoutRoutine());
+
+        Debug.Log("[KillerAI] DEATH SLASH - Waiting for animation to complete");
     }
 
     // ---------------------------
@@ -273,14 +318,43 @@ public class KillerAI : NetworkBehaviour
 
     private void GoToNextWaypoint()
     {
-        if (waypoints == null || waypoints.Length == 0) return;
+        if (waypoints == null || waypoints.Length == 0) 
+        {
+            Debug.LogWarning("[KillerAI] No waypoints available for patrol");
+            return;
+        }
 
-        Transform wp = waypoints[_currentWaypointIndex];
+        // Find a valid waypoint (skip null ones)
+        int attempts = 0;
+        Transform wp = null;
+        
+        while (attempts < waypoints.Length)
+        {
+            wp = waypoints[_currentWaypointIndex];
+            if (wp != null)
+            {
+                break; // Found a valid waypoint
+            }
+            
+            Debug.LogWarning($"[KillerAI] Waypoint {_currentWaypointIndex} is null, skipping to next");
+            _currentWaypointIndex = (_currentWaypointIndex + 1) % waypoints.Length;
+            attempts++;
+        }
+
         if (wp != null)
         {
             _agent.destination = wp.position;
+            _agent.isStopped = false; // Ensure agent is not stopped
+            
+            Debug.Log($"[KillerAI] Setting patrol destination to waypoint {_currentWaypointIndex} at {wp.position}");
+            
+            // Only advance to next waypoint if we found a valid one
+            _currentWaypointIndex = (_currentWaypointIndex + 1) % waypoints.Length;
         }
-        _currentWaypointIndex = (_currentWaypointIndex + 1) % waypoints.Length;
+        else
+        {
+            Debug.LogError("[KillerAI] No valid waypoints found in the entire array!");
+        }
     }
 
     private void PositionInFrontOfPlayer()
@@ -306,7 +380,6 @@ public class KillerAI : NetworkBehaviour
     }
     
 
-
     /// <summary>
     /// Sets animator parameters in one place.
     /// </summary>
@@ -315,15 +388,41 @@ public class KillerAI : NetworkBehaviour
         _anim.SetBool(HashIsPatrolling, patrol);
         _anim.SetBool(HashIsChasing, chase);
         _anim.SetBool(HashIsSlashing, slash);
+        
+        Debug.Log($"[KillerAI] Animator - Patrol: {patrol}, Chase: {chase}, Slash: {slash}");
     }
 
     // ---------------------------
-    // Input Lockdown
+    // Animation Timeout Failsafe
+    // ---------------------------
+    private IEnumerator SlashTimeoutRoutine()
+    {
+        Debug.Log($"[KillerAI] Slash timeout started - will auto-resume in {slashAnimationTimeout} seconds");
+        
+        yield return new WaitForSeconds(slashAnimationTimeout);
+        
+        if (_isAttacking)
+        {
+            Debug.LogWarning("[KillerAI] Slash animation timeout! Animation event may be missing. Forcing patrol resume.");
+            OnSlashAnimationComplete();
+        }
+        
+        _slashTimeoutCoroutine = null;
+    }
+
+    // ---------------------------
+    // Camera Lock Coroutine (Fixed)
     // ---------------------------
     private IEnumerator LockCameraOnKiller()
     {
         var cam = Camera.main;
-        if (!cam) { _camLockCR = null; yield break; }
+        
+        // Check if camera is null or destroyed before starting
+        if (!cam || cam == null) 
+        { 
+            _camLockCR = null; 
+            yield break; 
+        }
 
         // SNAP on the first frame so target is exactly centered immediately
         Vector3 targetPos = (cameraLookTarget ? cameraLookTarget.position : transform.position) + cameraAimOffset;
@@ -334,8 +433,15 @@ public class KillerAI : NetworkBehaviour
         yield return null; // first-frame snap done
 
         // Smoothly keep it centered while attacking
-        while (_isAttacking && !_isPlayerDead)
+        while (_isAttacking && !_isPlayerDead && cam != null)
         {
+            // Additional safety check - camera might be destroyed during this frame
+            if (cam == null) 
+            {
+                _camLockCR = null;
+                yield break;
+            }
+
             // Maintain a minimum distance so the model doesn't overshoot frame
             float dist = Vector3.Distance(cam.transform.position, targetPos);
             if (dist < cameraMinDistance)
@@ -360,8 +466,6 @@ public class KillerAI : NetworkBehaviour
         _camLockCR = null;
     }
 
-
-
     /// Disables known movement/camera scripts and continually clears input axes.
     /// Keeps doing so while attacking or after player death.
     [ServerRpc]
@@ -370,6 +474,7 @@ public class KillerAI : NetworkBehaviour
         // Server tells that specific client to disable their input
         DisablePlayerInputClientRpc(playerRef);
     }
+    
     [ClientRpc]
     private void DisablePlayerInputClientRpc(NetworkObjectReference playerRef)
     {
@@ -385,36 +490,7 @@ public class KillerAI : NetworkBehaviour
             var cam = netObj.GetComponentInChildren<FirstPersonCam>();
             if (cam != null) cam.enabled = false;
         }
-       
     }
-
-    // private void DisableIfPresentOn<T>(Transform root, string label) where T : Behaviour
-    // {
-    //     var comp = root.GetComponent<T>() ?? root.GetComponentInChildren<T>(true);
-    //     if (comp != null && comp.enabled)
-    //     {
-    //         comp.enabled = false;
-    //         Debug.Log($"✓ {label} disabled on: {comp.gameObject.name}");
-    //     }
-    //     else
-    //     {
-    //         Debug.Log($"✗ {label} not found/enabled on camera hierarchy");
-    //     }
-    // }
-
-    // private void DisableAllOfType<T>(string label) where T : Behaviour
-    // {
-    //     var all = FindObjectsByType<T>(FindObjectsSortMode.None);
-    //     foreach (var c in all)
-    //     {
-    //         if (c.enabled)
-    //         {
-    //             c.enabled = false;
-    //             Debug.Log($"✓ {label} disabled via FindObjectsByType: {c.gameObject.name}");
-    //         }
-    //     }
-    // }
-
 
     // ---------------------------
     // Animation Events / Game Over
@@ -425,27 +501,44 @@ public class KillerAI : NetworkBehaviour
     /// </summary>
     public void OnSlashAnimationComplete()
     {
-        if (player == null) return;
+        Debug.Log("[KillerAI] Slash animation complete - Resuming patrol");
+        
+        // Stop timeout coroutine
+        if (_slashTimeoutCoroutine != null)
+        {
+            StopCoroutine(_slashTimeoutCoroutine);
+            _slashTimeoutCoroutine = null;
+        }
 
-        // Kill the player
-        var playerState = player.GetComponent<PlayerState>();
-        if (playerState != null)
-            playerState.KillPlayerServerRpc();
+        // Stop camera coroutine
+        if (_camLockCR != null)
+        {
+            StopCoroutine(_camLockCR);
+            _camLockCR = null;
+        }
 
-        // Remove player from AI's alive list immediately
-        alivePlayers.Remove(player);
-        player = null;
+        // Don't kill the player again here - it's already done in AttackPlayer()
+        // Just remove the player reference if it exists
+        if (player != null)
+        {
+            // Make sure player is removed from alive list
+            if (alivePlayers.Contains(player))
+                alivePlayers.Remove(player);
+            player = null;
+        }
 
         // Stop slash animation
-        SetAnim(patrol:false, chase:false, slash:false);
+        SetAnim(patrol: true, chase: false, slash: false);
 
         // Reset killer state
         _isAttacking = false;
         _agent.isStopped = false;
         _agent.updateRotation = true;
 
-        // Resume patroling
+        // Resume patrolling - force a new waypoint
         GoToNextWaypoint();
+        
+        Debug.Log("[KillerAI] Patrol resumed after slash");
     }
 
     private void TriggerGameOver()
@@ -470,6 +563,7 @@ public class KillerAI : NetworkBehaviour
             }
         }
     }
+    
     private IEnumerator PlaceTrapRoutine()
     {
         if (!IsServer)
@@ -502,6 +596,5 @@ public class KillerAI : NetworkBehaviour
         // Resume patrol
         _isPlacingTrap = false;
         _agent.isStopped = false;
-        
     }
 }
