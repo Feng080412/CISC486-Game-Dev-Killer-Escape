@@ -259,9 +259,13 @@ W A S D  - Move
 Mouse    - Look
 Ctrl     - Crouch
 
-## 👥 Multiplayer Method
+## 👥 Multiplayer Method/How to run
 We used unity's netcode package for managing consistent entities and animations with multiple clients.
 Testing for multiplayer features achieved with multiplayer play mode package.
+To use this package, find multiplayer play mode in the window dropdown in the multiplayer subtab.
+Within this window you can create another client/clients.
+Then click the network manager object while the system is running (on every window) and click start host/server on the original and start client on the others.
+Every player should now be in the scene, showing smooth consistent updates between them.
 The multiplayer is through a network where one client can set up as a server or host and then other clients can join.
 
 ## Credits for assets
