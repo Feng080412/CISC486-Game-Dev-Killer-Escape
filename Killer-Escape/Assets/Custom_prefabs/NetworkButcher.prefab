@@ -723,11 +723,12 @@ MonoBehaviour:
   waypoints:
   - {fileID: 0}
   - {fileID: 0}
-  detectionRange: 5
+  detectionRange: 0
   attackRange: 2
   chaseSpeed: 6
   patrolSpeed: 3
   slashDistance: 1.5
+  slashAnimationTimeout: 3
   checkInterval: 5
   trapChance: 0.3
   trapSpawn: {fileID: 6538856603489967423}
