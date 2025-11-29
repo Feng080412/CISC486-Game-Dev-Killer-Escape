@@ -257,11 +257,12 @@ The Killer NPC uses Unity’s **NavMeshAgent** system to navigate the environmen
 ```plaintext
 W A S D  - Move
 Mouse    - Look
-Mouse1   - Use Item
-E        - Interact (pick up, drop, close door, disarm)
-Q        - Drop held item
 Ctrl     - Crouch
-Esc      - Pause
+
+## 👥 Multiplayer Method
+We used unity's netcode package for managing consistent entities and animations with multiple clients.
+Testing for multiplayer features achieved with multiplayer play mode package.
+The multiplayer is through a network where one client can set up as a server or host and then other clients can join.
 
 ## Credits for assets
 "#30 Fly Trap - Catch "Inktober2019" (https://skfb.ly/6WPMN) by Canary Games is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
