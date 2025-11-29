@@ -1,12 +1,38 @@
 # 🎮 Killer Escape
 A2-video link
 https://youtu.be/-MwOu3877Ig
+A3- video link
+https://youtu.be/BmmqDIYtzfA
 A2- What we have done
 # 🧠 Killer NPC FSM — State & Transition Descriptions
 
 This document outlines the finite state machine (FSM) used to control the behavior of the Killer NPC in the *Killer Escape* game. The FSM consists of the following states: **Patrol**, **Chase**, **Slash (Attack)**, and **GameOver**.
 
 ---
+***🧭 Pathfinding Implementation***
+
+The Killer NPC uses Unity’s **NavMeshAgent** system to navigate the environment. The entire level is **NavMesh-baked**, allowing the AI to move naturally through hallways, rooms, and obstacles without manual path scripting.
+
+---
+
+### 🔹 Navigation Overview
+- Uses Unity’s **NavMesh** for all walkable surfaces  
+- `NavMeshAgent` automatically handles:  
+  - Path creation  
+  - Obstacle avoidance  
+  - Dynamic re-pathing  
+  - Smoothing and rotation  
+- All navigation behavior is driven by the Killer’s FSM (Patrol → Chase → Search → Capture)
+
+---
+
+### 🔹 FSM Pathfinding Behavior
+
+#### **Patrol**
+- Moves between waypoint positions  
+- Uses:
+  ```csharp
+  agent.SetDestination(nextWaypoint.position);
 
 ## 📌 States
 
@@ -28,6 +54,7 @@ This document outlines the finite state machine (FSM) used to control the behavi
 
 **Exit:**
 - Player detected → Transition to **Chase**
+- Random Chance on Interval → Transition to **Place Trap**
 
 ---
 
@@ -73,6 +100,28 @@ This document outlines the finite state machine (FSM) used to control the behavi
 
 **Exit:**
 - On `OnSlashAnimationComplete()` → Mark player dead and show Game Over UI
+
+---
+---
+
+### 🟥 Place Trap 
+
+**Purpose:** Play trap placing animation and spawn bear trap entity.
+
+**Enter:**
+- Stop agent:
+  - `isStopped = true`
+- Trigger animation change and Institate entity
+- `Animator.isPlacingTrap = true`
+
+**Update:**
+- Wait until animation finishes (Coroutine)
+
+**Exit:**
+- After IEnumerator return
+   - `isStopped = false'
+   - return to patrol state
+   - `Animator.isPlacingTrap = false
 
 ---
 
