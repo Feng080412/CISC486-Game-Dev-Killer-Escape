@@ -16,6 +16,12 @@ public class FirstPersonCam : MonoBehaviour
         //make cursor in middle and invisible
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        // Auto-find orientation if not assigned
+        if (orientation == null)
+        {
+            Debug.LogWarning("FirstPersonCam: Orientation not found! Make sure the player has a child named 'Orientation'.");
+        }
     }
 
     // Update is called once per frame

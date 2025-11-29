@@ -1,31 +1,60 @@
 using UnityEngine;
-using System.Collections;
+using Unity.Netcode;
 
-public class BearTrap : MonoBehaviour
+public class BearTrap : NetworkBehaviour
 {
     public Animator animator;
-    public float stunDuration = 2f;
     public float destroyDelay = 1.5f;
+    public float stunDuration = 2f;
 
     private void OnTriggerEnter(Collider other)
     {
+        if (!IsServer) return;
 
-        if (other.CompareTag("Player"))
+        if (!other.CompareTag("Player")) return;
+
+        // Look for NetworkObject on self or parent
+        NetworkObject playerNetObj = other.GetComponentInParent<NetworkObject>();
+        if (playerNetObj != null && other.CompareTag("Player"))
         {
-            animator?.SetTrigger("Snap");
-                
-            
-            PlayerMovement player = other.GetComponentInParent<PlayerMovement>();
-            player?.Stun(stunDuration);
-                
-
-            StartCoroutine(DestroySelf());
+            ActivateTrapServerRpc(new NetworkObjectReference(playerNetObj));
         }
     }
-    private IEnumerator DestroySelf()
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void ActivateTrapServerRpc(NetworkObjectReference playerRef)
     {
-        yield return new WaitForSeconds(destroyDelay);
-        Destroy(gameObject);
+        if (!playerRef.TryGet(out NetworkObject playerObj)) return;
+
+        // Apply stun to the player
+        var playerState = playerObj.GetComponent<PlayerState>();
+        if (playerState != null)
+        {
+            playerState.StunPlayer(stunDuration);
+        }
+
+        // Play animation for all clients
+        PlayTrapAnimationClientRpc();
+
+        // Destroy trap after delay
+        Invoke(nameof(DestroySelf), destroyDelay);
     }
 
+    [ClientRpc]
+    private void PlayTrapAnimationClientRpc()
+    {
+        if (animator != null)
+        {
+            // Ensure this trigger exists in your Animator
+            animator.SetTrigger("Snap");
+        }
+    }
+
+    private void DestroySelf()
+    {
+        if (IsServer)
+        {
+            Destroy(gameObject);
+        }
+    }
 }

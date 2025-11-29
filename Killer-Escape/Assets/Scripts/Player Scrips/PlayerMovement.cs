@@ -1,7 +1,8 @@
 using UnityEngine;
 using System.Collections;
+using Unity.Netcode;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : NetworkBehaviour
 {
     [Header("Movement")]
     public float moveSpeed;
@@ -48,10 +49,17 @@ public class PlayerMovement : MonoBehaviour
     private float verticalInput;
     private Vector3 moveDirection;
 
+    private NetworkVariable<float> netYaw =
+    new NetworkVariable<float>(
+        0f,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Owner);
+
     private Rigidbody rb;
 
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
+    
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -66,6 +74,21 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+
+        if (!IsOwner) {
+            if (orientation != null)
+            orientation.rotation = Quaternion.Euler(0f, netYaw.Value, 0f);
+
+            return;
+        }
+
+        // OWNER: write orientation yaw every frame
+        if (orientation != null)
+        {
+            float yaw = orientation.eulerAngles.y;
+            netYaw.Value = yaw;
+        }
+
         GroundCheck();
         GetInput();
         SpeedControl();
@@ -89,7 +112,7 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-    
+        if (!IsOwner) return;
         MovePlayer();
 
     }
@@ -191,6 +214,7 @@ public class PlayerMovement : MonoBehaviour
     {
         StartCoroutine(StunRoutine(duration));
     }
+
     private IEnumerator StunRoutine(float duration)
     {
         isStunned = true;
@@ -199,11 +223,28 @@ public class PlayerMovement : MonoBehaviour
         
 
         // stop all current motion
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
+        if (!rb.isKinematic)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+        
         yield return new WaitForSeconds(duration);
         isStunned = false;
         moveSpeed = moveTemp;
 
+    }
+
+    public void StunInfinite()
+    {
+        StopAllCoroutines(); // prevent stacking
+        isStunned = true;
+        rb.linearVelocity = Vector3.zero;
+    }
+
+    public void Unstun()
+    {
+        StopAllCoroutines();
+        isStunned = false;
     }
 }
