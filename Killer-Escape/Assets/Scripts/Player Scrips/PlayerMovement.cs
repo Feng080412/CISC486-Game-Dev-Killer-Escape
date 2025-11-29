@@ -49,6 +49,12 @@ public class PlayerMovement : NetworkBehaviour
     private float verticalInput;
     private Vector3 moveDirection;
 
+    private NetworkVariable<float> netYaw =
+    new NetworkVariable<float>(
+        0f,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Owner);
+
     private Rigidbody rb;
 
     
@@ -69,7 +75,19 @@ public class PlayerMovement : NetworkBehaviour
     void Update()
     {
 
-        if (!IsOwner) return;
+        if (!IsOwner) {
+            if (orientation != null)
+            orientation.rotation = Quaternion.Euler(0f, netYaw.Value, 0f);
+
+            return;
+        }
+
+        // OWNER: write orientation yaw every frame
+        if (orientation != null)
+        {
+            float yaw = orientation.eulerAngles.y;
+            netYaw.Value = yaw;
+        }
 
         GroundCheck();
         GetInput();
